@@ -1,0 +1,22 @@
+<?php
+include '../../../includes/config.php';
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
+    header("Location: ../../login.php");
+    exit();
+}
+
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header("Location: read.php");
+    exit();
+}
+
+$id = intval($_GET['id']);
+
+// Delete product
+$stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+
+header("Location: read.php");
+exit();

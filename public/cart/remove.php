@@ -1,0 +1,20 @@
+<?php
+session_start();
+include '../includes/config.php';
+
+if (!isset($_SESSION['customer_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+    $id = intval($_GET['id']);
+    $customer_id = $_SESSION['customer_id'];
+    
+    $stmt = $conn->prepare("DELETE FROM cart WHERE id = ? AND customer_id = ?");
+    $stmt->bind_param("ii", $id, $customer_id);
+    $stmt->execute();
+}
+
+header("Location: cart.php");
+exit();
