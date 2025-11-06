@@ -9,6 +9,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
+    $phone = trim($_POST['phone']);
+    $address = trim($_POST['address']);
 
     // Validation
     if ($password !== $confirm_password) {
@@ -16,6 +18,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message_type = "error";
     } elseif (strlen($password) < 6) {
         $message = "❌ Password must be at least 6 characters!";
+        $message_type = "error";
+    } elseif (empty($phone)) {
+        $message = "❌ Phone number is required!";
+        $message_type = "error";
+    } elseif (empty($address)) {
+        $message = "❌ Address is required!";
         $message_type = "error";
     } else {
         $check = $conn->prepare("SELECT * FROM users WHERE email = ?");
@@ -28,8 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $message_type = "error";
         } else {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $username, $email, $hashed_password);
+            $stmt = $conn->prepare("INSERT INTO users (username, email, password, phone, address) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssss", $username, $email, $hashed_password, $phone, $address);
 
             if ($stmt->execute()) {
                 header("Location: login.php?registered=true");
@@ -558,6 +566,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                        placeholder="your.email@example.com" 
                                        required>
                                 <span class="input-icon">📧</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <div class="input-wrapper">
+                                <input type="tel" 
+                                       name="phone" 
+                                       class="form-input" 
+                                       placeholder="+63 XXX XXX XXXX" 
+                                       required>
+                                <span class="input-icon">📱</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <div class="input-wrapper">
+                                <input type="text" 
+                                       name="address" 
+                                       class="form-input" 
+                                       placeholder="Your complete address" 
+                                       required>
+                                <span class="input-icon">📍</span>
                             </div>
                         </div>
 
