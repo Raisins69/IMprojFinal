@@ -8,9 +8,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
 
 $stmt = $conn->prepare("
 SELECT o.id, o.order_date, o.total_amount, o.payment_method, 
-       c.name AS customer_name
+       COALESCE(c.name, u.username, 'Unknown Customer') AS customer_name
 FROM orders o
-JOIN customers c ON o.customer_id = c.id
+LEFT JOIN customers c ON o.customer_id = c.id
+LEFT JOIN users u ON c.email = u.email
 ORDER BY o.order_date DESC");
 $stmt->execute();
 $result = $stmt->get_result();

@@ -15,9 +15,11 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) || !preg_match('/^\d{4}-\d{2}-\d
     $to = date('Y-m-t');
 }
 
-$stmt = $conn->prepare("SELECT o.id, o.total_amount, o.order_date, c.name AS customer_name
+$stmt = $conn->prepare("SELECT o.id, o.total_amount, o.order_date, 
+                        COALESCE(c.name, u.username, 'Unknown Customer') AS customer_name
                         FROM orders o
-                        JOIN customers c ON o.customer_id = c.id
+                        LEFT JOIN customers c ON o.customer_id = c.id
+                        LEFT JOIN users u ON c.email = u.email
                         WHERE DATE(o.order_date) BETWEEN ? AND ?
                         ORDER BY o.order_date DESC");
 $stmt->bind_param("ss", $from, $to);
