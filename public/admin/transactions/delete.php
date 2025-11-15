@@ -1,5 +1,7 @@
 <?php
-include __DIR__ . '/../../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");

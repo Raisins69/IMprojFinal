@@ -1,38 +1,66 @@
 <?php
-include __DIR__ . '/../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
-    header("Location: ../../login.php");
-    exit();
+// Generate CSRF token if not exists
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Handle search and filter (FR3.3)
-$search = $_GET['search'] ?? '';
+// Initialize variables
+$search = filter_input(INPUT_GET, 'search', FILTER_SANITIZE_STRING) ?? '';
+$error = '';
+$suppliers = [];
 
-$query = "SELECT * FROM suppliers WHERE 1=1";
-$params = [];
-$types = "";
+try {
+    // Build query with prepared statements
+    $query = "SELECT * FROM suppliers WHERE 1=1";
+    $params = [];
+    $types = "";
 
-if (!empty($search)) {
-    $query .= " AND (name LIKE ? OR contact_person LIKE ?)";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
-    $types .= "ss";
+    if (!empty($search)) {
+        $query .= " AND (name LIKE ? OR contact_person LIKE ?)";
+        $searchTerm = "%$search%";
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+        $types .= "ss";
+    }
+
+    $query .= " ORDER BY id DESC";
+
+    $stmt = $conn->prepare($query);
+    if ($stmt === false) {
+        throw new Exception('Database prepare failed: ' . $conn->error);
+    }
+
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    
+    if (!$stmt->execute()) {
+        throw new Exception('Query execution failed: ' . $stmt->error);
+    }
+    
+    $result = $stmt->get_result();
+    if ($result === false) {
+        throw new Exception('Failed to get result set: ' . $stmt->error);
+    }
+    
+    $suppliers = $result->fetch_all(MYSQLI_ASSOC);
+    
+} catch (Exception $e) {
+    $error = 'Error loading suppliers: ' . $e->getMessage();
+    error_log($e->getMessage());
 }
 
-$query .= " ORDER BY id DESC";
-
-$stmt = $conn->prepare($query);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
-$stmt->execute();
-$result = $stmt->get_result();
-include '../../../includes/header.php';
+require_once __DIR__ . '/../../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php
+// Include config and check admin access
+require_once __DIR__ . '/../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Suppliers List</h2>
@@ -64,7 +92,12 @@ include '../../../includes/header.php';
             </thead>
 
             <tbody>
-                <?php while($row = $result->fetch_assoc()): ?>
+                <?php if (!empty($error)): ?>
+                    <tr><td colspan="7" class="error"><?= htmlspecialchars($error) ?></td></tr>
+                <?php elseif (empty($suppliers)): ?>
+                    <tr><td colspan="7">No suppliers found.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($suppliers as $row): ?>
 <tr>
     <td><?= htmlspecialchars($row['id']); ?></td>
     <td><?= htmlspecialchars($row['name']); ?></td>
@@ -75,14 +108,18 @@ include '../../../includes/header.php';
     <td>
         <a class="btn-view" href="deliveries.php?supplier_id=<?= intval($row['id']); ?>">📦 Deliveries</a>
         <a class="btn-edit" href="update.php?id=<?= intval($row['id']); ?>">✏ Edit</a>
-        <a class="btn-delete" href="delete.php?id=<?= intval($row['id']); ?>" 
-           onclick="return confirm('Delete this supplier?');">🗑 Delete</a>
+        <a class="btn-delete" href="#" 
+           onclick="if(confirm('Are you sure you want to delete this supplier? This action cannot be undone.')) { 
+               window.location.href='delete.php?id=<?= intval($row['id']) ?>&token=<?= $_SESSION['csrf_token'] ?>';
+           } return false;" 
+           title="Delete Supplier">🗑 Delete</a>
     </td>
 </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../../includes/footer.php'; ?>

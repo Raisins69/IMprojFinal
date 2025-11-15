@@ -1,5 +1,9 @@
 <?php
-include __DIR__ . '/../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+
+require_once __DIR__ . '/../../includes/config.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");
@@ -52,17 +56,25 @@ if ($customer) {
     $orders = null;
 }
 
-include '../../../includes/header.php';
+require_once __DIR__ . '/../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ require_once '../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Purchase History: <?= htmlspecialchars($user['username']) ?></h2>
         <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
 
-        <?php if ($orders && $orders->num_rows > 0): ?>
+        <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ if ($orders && $orders->num_rows > 0): ?>
             <table class="styled-table">
                 <thead>
                     <tr>
@@ -76,7 +88,11 @@ include '../../../includes/header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while($order = $orders->fetch_assoc()): ?>
+                    <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ while($order = $orders->fetch_assoc()): ?>
                         <tr>
                             <td><?= htmlspecialchars($order['id']) ?></td>
                             <td><?= htmlspecialchars($order['order_date']) ?></td>
@@ -88,11 +104,19 @@ include '../../../includes/header.php';
                                 <a class="btn-view" href="../transactions/view.php?id=<?= intval($order['id']) ?>">👁 View</a>
                             </td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ endwhile; ?>
                 </tbody>
             </table>
 
             <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+
             // Calculate total spent
             $stmt = $conn->prepare("SELECT SUM(total_amount) as total_spent, COUNT(*) as order_count 
                                    FROM orders WHERE customer_id = ?");
@@ -106,13 +130,25 @@ include '../../../includes/header.php';
                 <p><strong>Total Orders:</strong> <?= $stats['order_count'] ?></p>
                 <p><strong>Total Spent:</strong> ₱<?= number_format($stats['total_spent'], 2) ?></p>
             </div>
-        <?php else: ?>
+        <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ else: ?>
             <p style="text-align: center; padding: 20px; color: #888;">This customer has no purchase history yet.</p>
-        <?php endif; ?>
+        <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ endif; ?>
 
         <br>
         <a href="read.php" class="btn-secondary">⬅ Back to Customers</a>
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ require_once __DIR__ . '/../../includes/footer.php'; ?>

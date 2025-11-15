@@ -288,15 +288,75 @@ include '../includes/header.php';
             </div>
 
             <?php if ($product['stock'] > 0): ?>
-                <form method="POST" action="<?= BASE_URL ?>/cart/add.php">
-                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-                    <label>Quantity:</label>
-                    <input type="number" name="quantity" value="1" min="1" max="<?= $product['stock'] ?>" style="width: 100px; padding: 0.5rem; margin: 1rem 0;">
-                    <br>
-                    <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.2rem;">🛒 Add to Cart</button>
+                <form method="GET" action="<?= BASE_URL ?>/cart/add.php" class="add-to-cart-form">
+                    <input type="hidden" name="id" value="<?= $product['id'] ?>">
+                    <input type="hidden" name="return_url" value="<?= urlencode((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) ?>">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="quantity" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?= $product['stock'] ?>" class="quantity-input" style="width: 100px; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--dark-light); color: var(--text-primary);">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <span>🛒</span> Add to Cart
+                    </button>
                 </form>
+                <script>
+                // Add form submission handler
+                document.querySelector('.add-to-cart-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const form = this;
+                    const formData = new FormData(form);
+                    
+                    fetch(form.action + '?' + new URLSearchParams(formData), {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            const message = document.createElement('div');
+                            message.className = 'alert alert-success';
+                            message.textContent = data.message || 'Product added to cart!';
+                            form.parentNode.insertBefore(message, form.nextSibling);
+                            setTimeout(() => message.remove(), 3000);
+                            
+                            // Update cart count if needed
+                            const cartCount = document.querySelector('.cart-count');
+                            if (cartCount) {
+                                cartCount.textContent = parseInt(cartCount.textContent || '0') + 1;
+                            }
+                            
+                            // Redirect if needed
+                            if (data.redirect) {
+                                window.location.href = data.redirect;
+                            }
+                        } else {
+                            throw new Error(data.message || 'Failed to add to cart');
+                        }
+                    })
+                    .catch(error => {
+                        alert(error.message || 'An error occurred. Please try again.');
+                        console.error('Error:', error);
+                    });
+                });
+                </script>
+                <style>
+                    .add-to-cart-form button:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    }
+                    .add-to-cart-form button:active {
+                        transform: translateY(1px);
+                    }
+                    .quantity-input::-webkit-inner-spin-button,
+                    .quantity-input::-webkit-outer-spin-button {
+                        opacity: 1;
+                    }
+                </style>
             <?php else: ?>
-                <button class="btn-secondary" disabled style="width: 100%; padding: 1rem;">Out of Stock</button>
+                <button class="btn-secondary" disabled style="width: 100%; padding: 1rem; cursor: not-allowed; opacity: 0.7;">Out of Stock</button>
             <?php endif; ?>
         </div>
     </div>

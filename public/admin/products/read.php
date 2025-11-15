@@ -13,12 +13,16 @@ $size = $_GET['size'] ?? '';
 $min_price = $_GET['min_price'] ?? '';
 $max_price = $_GET['max_price'] ?? '';
 
-$query = "SELECT * FROM products WHERE 1=1";
+$query = "SELECT p.*, s.name as supplier_name 
+          FROM products p
+          LEFT JOIN supplier_products sp ON p.id = sp.product_id AND sp.is_primary = 1
+          LEFT JOIN suppliers s ON sp.supplier_id = s.id
+          WHERE 1=1";
 $params = [];
 $types = "";
 
 if (!empty($search)) {
-    $query .= " AND (name LIKE ? OR brand LIKE ?)";
+    $query .= " AND (p.name LIKE ? OR p.brand LIKE ?)";
     $params[] = "%$search%";
     $params[] = "%$search%";
     $types .= "ss";
@@ -67,6 +71,10 @@ $sizes = $conn->query("SELECT DISTINCT size FROM products ORDER BY size");
 
     <main class="admin-content">
         <h2>Products List</h2>
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']) ?></div>
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
         <a href="<?= ADMIN_URL ?>/products/create.php" class="btn-primary">➕ Add Product</a>
 
         <!-- Search and Filter Form -->
@@ -122,6 +130,7 @@ $sizes = $conn->query("SELECT DISTINCT size FROM products ORDER BY size");
                     <th>Price</th>
                     <th>Stock</th>
                     <th>Condition</th>
+                    <th>Supplier</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -129,7 +138,7 @@ $sizes = $conn->query("SELECT DISTINCT size FROM products ORDER BY size");
             <tbody>
                 <?php while ($row = $result->fetch_assoc()) { ?>
                     <tr>
-                        <td><img src="<?= BASE_URL ?>/uploads/<?= htmlspecialchars($row['image']); ?>" height="50"></td>
+                        <td><img src="<?= BASE_URL ?>/uploads/<?= htmlspecialchars($row['image']); ?>" height="50" alt="<?= htmlspecialchars($row['name']) ?>"></td>
                         <td><?= htmlspecialchars($row['name']); ?></td>
                         <td><?= htmlspecialchars($row['brand']); ?></td>
                         <td><?= htmlspecialchars($row['category']); ?></td>
@@ -137,6 +146,7 @@ $sizes = $conn->query("SELECT DISTINCT size FROM products ORDER BY size");
                         <td>₱<?= number_format($row['price'], 2); ?></td>
                         <td><?= htmlspecialchars($row['stock']); ?></td>
                         <td><?= htmlspecialchars($row['condition_type']); ?></td>
+                        <td><?= !empty($row['supplier_name']) ? htmlspecialchars($row['supplier_name']) : 'No Supplier'; ?></td>
                         <td>
                             <a class="btn-edit" href="<?= ADMIN_URL ?>/products/update.php?id=<?= intval($row['id']); ?>">✏ Edit</a>
                             <a class="btn-delete" href="<?= ADMIN_URL ?>/products/delete.php?id=<?= intval($row['id']); ?>" onclick="return confirm('Delete this product?');">🗑 Delete</a>

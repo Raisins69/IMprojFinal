@@ -1,5 +1,7 @@
 <?php
-include __DIR__ . '/../../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");
@@ -236,7 +238,7 @@ $items_q = $stmt->get_result();
     <div class="receipt-footer">
         <p><strong>Thank you for shopping at UrbanThrift!</strong></p>
         <p>For inquiries, please contact us at info@urbanthrift.com</p>
-        <p style="margin-top: 10px; font-size: 11px;">This is a computer-generated receipt and does not require a signature.</p>
+        <p style="margin-top: 10px; font-size: 11px;">This is a computer-generated receipt and does not require_once a signature.</p>
     </div>
 </div>
 
