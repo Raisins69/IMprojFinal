@@ -8,7 +8,11 @@ $error = '';
 $success = '';
 $supplier_id = filter_input(INPUT_GET, 'supplier_id', FILTER_VALIDATE_INT);
 $supplier = null;
-$deliveries = [];
+$deliveries = null;
+$total_pages = 1;  // Initialize to 1 by default
+$per_page = 20;
+$page = max(1, filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1);
+$offset = ($page - 1) * $per_page;
 
 try {
     // Validate supplier ID
@@ -52,12 +56,10 @@ try {
         $conn->begin_transaction();
         
         try {
-            // Update delivery status
+            // Update delivery status - simplified to just update the delivery date
             $updateStmt = $conn->prepare("
                 UPDATE supplier_deliveries 
-                SET status = ?, 
-                    received_by = IF(? = 'Received', ?, received_by),
-                    received_at = IF(? = 'Received' AND received_at IS NULL, NOW(), received_at)
+                SET delivery_date = IF(? = 'Received' AND delivery_date > NOW(), NOW(), delivery_date)
                 WHERE id = ? AND supplier_id = ?
             ");
             
@@ -65,8 +67,7 @@ try {
                 throw new Exception('Database prepare failed: ' . $conn->error);
             }
             
-            $current_user_id = $_SESSION['user_id'] ?? 0;
-            $updateStmt->bind_param("ssisii", $status, $status, $current_user_id, $status, $delivery_id, $supplier_id);
+            $updateStmt->bind_param("sii", $status, $delivery_id, $supplier_id);
             
             if (!$updateStmt->execute()) {
                 throw new Exception('Failed to update delivery status: ' . $updateStmt->error);
@@ -91,9 +92,7 @@ try {
     }
 
     // Get all deliveries for this supplier with pagination
-    $page = max(1, filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1);
-    $per_page = 20;
-    $offset = ($page - 1) * $per_page;
+    // Pagination variables are already initialized at the top
     
     // Get total count for pagination
     $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM supplier_deliveries WHERE supplier_id = ?");
@@ -180,7 +179,7 @@ checkAdmin();
             </div>
         </div>
 
-        <?php if ($deliveries->num_rows > 0): ?>
+        <?php if ($deliveries && $deliveries->num_rows > 0): ?>
             <table class="styled-table">
                 <thead>
                     <tr>
@@ -208,8 +207,13 @@ checkAdmin();
                             <td>₱<?= number_format($delivery['cost'], 2) ?></td>
                             <td><?= htmlspecialchars($delivery['delivery_date']) ?></td>
                             <td>
-                                <span class="status-badge <?= strtolower($delivery['status'] ?? 'Pending') ?>">
-                                    <?= htmlspecialchars($delivery['status'] ?? 'Pending') ?>
+                                <?php
+                                $deliveryDate = new DateTime($delivery['delivery_date']);
+                                $now = new DateTime();
+                                $status = ($deliveryDate <= $now) ? 'Received' : 'Pending';
+                                ?>
+                                <span class="status-badge <?= strtolower($status) ?>">
+                                    <?= htmlspecialchars($status) ?>
                                 </span>
                             </td>
                             <td>
@@ -217,7 +221,11 @@ checkAdmin();
                                     <span class="btn-icon">✏️</span> Edit
                                 </a>
                                 
-                                <?php if (($delivery['status'] ?? '') !== 'Received'): ?>
+                                <?php
+                                $deliveryDate = new DateTime($delivery['delivery_date']);
+                                $now = new DateTime();
+                                if ($deliveryDate > $now): 
+                                ?>
                                     <a href="#" class="btn-receive" 
                                        onclick="if(confirm('Mark this delivery as received?')) { 
                                            document.getElementById('delivery-<?= $delivery['id'] ?>').submit(); 
