@@ -26,7 +26,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 // First, get the customer ID that matches this user's email
-$stmt = $conn->prepare("SELECT u.id, u.username, u.email, u.is_active, c.id as customer_id 
+$stmt = $conn->prepare("SELECT u.id, u.username, u.email, u.profile_photo, u.is_active, c.id as customer_id 
                         FROM users u 
                         LEFT JOIN customers c ON u.email = c.email 
                         WHERE u.id = ?");
@@ -146,12 +146,15 @@ include '../../includes/header.php';
 
         .dashboard-header {
             background: linear-gradient(135deg, var(--dark-light) 0%, var(--dark) 100%);
-            padding: 3rem;
+            padding: 2rem 3rem;
             border-radius: var(--radius-xl);
             border: 1px solid rgba(155, 77, 224, 0.2);
             margin-bottom: 3rem;
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
         }
 
         .dashboard-header::before {
@@ -165,6 +168,24 @@ include '../../includes/header.php';
             filter: blur(60px);
         }
 
+        .profile-picture-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            flex-shrink: 0;
+            background: var(--darker);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .profile-picture {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
         .dashboard-header-content {
             position: relative;
             z-index: 1;
@@ -452,6 +473,30 @@ include '../../includes/header.php';
 <div class="dashboard-wrapper">
     <!-- Header -->
     <div class="dashboard-header">
+        <div class="profile-picture-container">
+            <?php
+            // Check if user has a profile picture, otherwise use default
+            $profile_pic = !empty($user['profile_photo']) 
+                ? '/IMprojFinal/public/uploads/profiles/' . htmlspecialchars($user['profile_photo'])
+                : 'https://ui-avatars.com/api/?name=' . urlencode($user['username'] ?? 'User') . '&background=9b4de0&color=fff&size=200';
+            
+            // Debug: Output the full path for verification
+            $full_path = $_SERVER['DOCUMENT_ROOT'] . '/IMprojFinal/public/uploads/profiles/' . htmlspecialchars($user['profile_photo'] ?? '');
+            error_log("Full server path to profile picture: " . $full_path);
+            error_log("File exists: " . (file_exists($full_path) ? 'Yes' : 'No'));
+            
+            // Debug output
+            error_log("Profile picture path: " . $profile_pic);
+            ?>
+            <div style="position: relative;">
+                <img src="<?= $profile_pic ?>" alt="Profile Picture" class="profile-picture" 
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=<?= urlencode($user['username'] ?? 'User') ?>&background=9b4de0&color=fff&size=200';">
+                <!-- Debug output -->
+                <div style="position: absolute; top: 100%; left: 0; background: white; color: black; padding: 5px; font-size: 12px; display: none;">
+                    Debug: <?= htmlspecialchars($profile_pic) ?>
+                </div>
+            </div>
+        </div>
         <div class="dashboard-header-content">
             <h1>👋 Welcome Back!</h1>
             <p class="greeting">Good to see you, <span><?= !empty($user['username']) ? htmlspecialchars($user['username']) : 'Valued Customer' ?></span></p>
