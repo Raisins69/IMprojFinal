@@ -1,5 +1,7 @@
 <?php
-include __DIR__ . '/../../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");
@@ -41,49 +43,50 @@ $stmt = $conn->prepare("
 $stmt->bind_param("i", $order_id);
 $stmt->execute();
 $items_q = $stmt->get_result();
+
+// Include header
+require_once __DIR__ . '/../../../includes/header.php';
 ?>
 
-<?php include __DIR__ . '/../../../includes/header.php'; ?>
-
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php require_once __DIR__ . '/../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Transaction Receipt</h2>
         <a href="receipt_print.php?id=<?= $order_id ?>" target="_blank" class="btn-primary" style="margin-bottom: 15px; display: inline-block;">🖨️ Print Receipt</a>
-<p><strong>Order ID:</strong> <?= htmlspecialchars($order['id']); ?></p>
-<p><strong>Customer:</strong> <?= htmlspecialchars($order['customer_name']); ?></p>
-<p><strong>Contact:</strong> <?= htmlspecialchars($order['contact_number']); ?></p>
-<p><strong>Date:</strong> <?= htmlspecialchars($order['order_date']); ?></p>
-<p><strong>Payment Method:</strong> <?= htmlspecialchars($order['payment_method']); ?></p>
+        <p><strong>Order ID:</strong> <?= htmlspecialchars($order['id']); ?></p>
+        <p><strong>Customer:</strong> <?= htmlspecialchars($order['customer_name']); ?></p>
+        <p><strong>Contact:</strong> <?= htmlspecialchars($order['contact_number']); ?></p>
+        <p><strong>Date:</strong> <?= htmlspecialchars($order['order_date']); ?></p>
+        <p><strong>Payment Method:</strong> <?= htmlspecialchars($order['payment_method']); ?></p>
 
-<hr>
+        <hr>
 
-<table class="styled-table">
+        <table class="styled-table">
             <thead>
                 <tr>
-    <th>Product</th>
-    <th>Qty</th>
-    <th>Unit Price</th>
-    <th>Subtotal</th>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Subtotal</th>
                 </tr>
             </thead>
             <tbody>
                 <?php while ($item = $items_q->fetch_assoc()): ?>
-<tr>
-    <td><?= htmlspecialchars($item['product_name']); ?></td>
-    <td><?= htmlspecialchars($item['quantity']); ?></td>
-    <td>₱<?= number_format($item['price'], 2); ?></td>
-    <td>₱<?= number_format($item['quantity'] * $item['price'], 2); ?></td>
-</tr>
+                <tr>
+                    <td><?= htmlspecialchars($item['product_name']); ?></td>
+                    <td><?= htmlspecialchars($item['quantity']); ?></td>
+                    <td>₱<?= number_format($item['price'], 2); ?></td>
+                    <td>₱<?= number_format($item['quantity'] * $item['price'], 2); ?></td>
+                </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
 
-<h3>Total: ₱<?= number_format($order['total_amount'], 2); ?></h3>
+        <h3>Total: ₱<?= number_format($order['total_amount'], 2); ?></h3>
 
         <a href="read.php" class="btn-secondary">⬅ Back to Transactions</a>
     </main>
 </div>
 
-<?php include __DIR__ . '/../../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../../includes/footer.php'; ?>

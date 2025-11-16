@@ -1,47 +1,81 @@
 <?php
-include __DIR__ . '/../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
-    header("Location: ../../login.php");
-    exit();
+// Initialize variables
+$message = filter_input(INPUT_GET, 'msg', FILTER_SANITIZE_STRING) ?? '';
+$users = [];
+$error = '';
+
+try {
+    // Prepare and execute query
+    $query = "SELECT id, username, email, phone, role, is_active, created_at 
+              FROM users 
+              ORDER BY id DESC";
+              
+    $stmt = $conn->prepare($query);
+    if ($stmt === false) {
+        throw new Exception('Database prepare failed: ' . $conn->error);
+    }
+    
+    if (!$stmt->execute()) {
+        throw new Exception('Query execution failed: ' . $stmt->error);
+    }
+    
+    $result = $stmt->get_result();
+    if ($result === false) {
+        throw new Exception('Failed to get result set: ' . $stmt->error);
+    }
+    
+    $users = $result->fetch_all(MYSQLI_ASSOC);
+    
+} catch (Exception $e) {
+    $error = 'Error loading users: ' . $e->getMessage();
+    error_log($e->getMessage());
 }
 
-// Show success message if any
-$message = $_GET['msg'] ?? '';
-
-$stmt = $conn->prepare("SELECT * FROM users ORDER BY id DESC");
-$stmt->execute();
-$result = $stmt->get_result();
-include '../../../includes/header.php';
+require_once __DIR__ . '/../../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php require_once __DIR__ . '/../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Users Management</h2>
-
+        
         <?php if ($message): ?>
-            <div style="padding: 1rem; margin-bottom: 1rem; background: #10b981; color: white; border-radius: 8px;">
+            <div class="alert alert-success">
                 ✅ <?= htmlspecialchars($message) ?>
             </div>
         <?php endif; ?>
 
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <?php while($row = $result->fetch_assoc()): ?>
+        <div class="table-responsive">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php if (!empty($error)): ?>
+                    <tr><td colspan="8" class="error"><?= htmlspecialchars($error) ?></td></tr>
+                <?php elseif (empty($users)): ?>
+                    <tr><td colspan="8">No users found.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($users as $row): 
+                        $is_active = isset($row['is_active']) ? (bool)$row['is_active'] : true;
+                        $status_color = $is_active ? '#10b981' : '#ef4444';
+                        $status_text = $is_active ? 'Active' : 'Inactive';
+                        $is_current_user = isset($_SESSION['user_id']) && $row['id'] == $_SESSION['user_id'];
+                    ?>
                 <tr style="<?= isset($row['is_active']) && !$row['is_active'] ? 'opacity: 0.5;' : '' ?>">
                     <td><?= htmlspecialchars($row['id']); ?></td>
                     <td><?= htmlspecialchars($row['username']); ?></td>
@@ -52,7 +86,7 @@ include '../../../includes/header.php';
                         </span>
                     </td>
                     <td>
-                        <?php 
+                        <?php
                         $is_active = isset($row['is_active']) ? $row['is_active'] : 1;
                         $status_color = $is_active ? '#10b981' : '#ef4444';
                         $status_text = $is_active ? 'Active' : 'Inactive';
@@ -78,10 +112,11 @@ include '../../../includes/header.php';
                         <?php endif; ?>
                     </td>
                 </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../../includes/footer.php'; ?>

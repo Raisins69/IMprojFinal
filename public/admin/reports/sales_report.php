@@ -1,5 +1,7 @@
 <?php
-include __DIR__ . '/../../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");
@@ -32,11 +34,11 @@ $stmt2->bind_param("ss", $from, $to);
 $stmt2->execute();
 $total_result = $stmt2->get_result();
 $total = $total_result->fetch_assoc()['total_sales'] ?? 0;
-include '../../../includes/header.php';
+require_once __DIR__ . '/../../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php require_once __DIR__ . '/../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Sales Report</h2>
@@ -66,16 +68,16 @@ include '../../../includes/header.php';
 
             <tbody>
                 <?php while($row = $result->fetch_assoc()): ?>
-<tr>
-    <td><?= htmlspecialchars($row['id']) ?></td>
-    <td><?= htmlspecialchars($row['customer_name']) ?></td>
-    <td>₱<?= number_format($row['total_amount'],2) ?></td>
-    <td><?= htmlspecialchars($row['order_date']) ?></td>
-</tr>
+                <tr>
+                    <td><?= htmlspecialchars($row['id']) ?></td>
+                    <td><?= htmlspecialchars($row['customer_name']) ?></td>
+                    <td>₱<?= number_format($row['total_amount'], 2) ?></td>
+                    <td><?= date('M d, Y h:i A', strtotime($row['order_date'])) ?></td>
+                </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../../includes/footer.php'; ?>

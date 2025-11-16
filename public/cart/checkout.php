@@ -62,8 +62,8 @@ try {
     }
     
     // Insert order
-    $stmt = $conn->prepare("INSERT INTO orders (customer_id, order_date, payment_method, total_amount, status) 
-                           VALUES (?, NOW(), ?, ?, 'Pending')");
+    $stmt = $conn->prepare("INSERT INTO orders (customer_id, order_date, payment_method, total_amount) 
+                           VALUES (?, NOW(), ?, ?)");
     $stmt->bind_param("isd", $customer_record_id, $payment_method, $total);
     $stmt->execute();
     $order_id = $conn->insert_id;

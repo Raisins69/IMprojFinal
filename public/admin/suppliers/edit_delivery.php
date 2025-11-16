@@ -1,5 +1,9 @@
 <?php
-include __DIR__ . '/../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+
+require_once __DIR__ . '/../../includes/config.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");
@@ -52,11 +56,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-include '../../../includes/header.php';
+require_once __DIR__ . '/../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ require_once '../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Edit Delivery</h2>
@@ -82,4 +90,8 @@ include '../../../includes/header.php';
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ require_once __DIR__ . '/../../includes/footer.php'; ?>

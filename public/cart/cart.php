@@ -1,21 +1,62 @@
 <?php
-include __DIR__ . '/../../includes/config.php';
+session_start();
+require_once __DIR__ . '/../../includes/config.php';
 
+// Check if user is logged in as customer
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'customer') {
-    header("Location: ../login.php");
+    $_SESSION['error'] = 'Please login to view your cart';
+    header("Location: " . BASE_URL . "/login.php");
     exit();
 }
 
 $customer_id = $_SESSION['user_id'];
-$stmt = $conn->prepare("SELECT c.id, c.product_id, c.quantity, p.name as product_name, p.price, p.image, p.brand, p.stock
+
+// Handle remove from cart action
+if (isset($_GET['action']) && $_GET['action'] === 'remove' && isset($_GET['id'])) {
+    $cart_id = intval($_GET['id']);
+    $stmt = $conn->prepare("DELETE FROM cart WHERE id = ? AND customer_id = ?");
+    $stmt->bind_param("ii", $cart_id, $customer_id);
+    if ($stmt->execute()) {
+        $_SESSION['success'] = 'Item removed from cart';
+    } else {
+        $_SESSION['error'] = 'Failed to remove item from cart';
+    }
+    header("Location: " . BASE_URL . "/cart/cart.php");
+    exit();
+}
+
+// Fetch cart items
+$stmt = $conn->prepare("SELECT c.id, c.product_id, c.quantity, 
+                               p.name as product_name, p.price, p.image, 
+                               p.brand, p.stock
                         FROM cart c 
                         JOIN products p ON c.product_id = p.id 
                         WHERE c.customer_id = ?");
 $stmt->bind_param("i", $customer_id);
 $stmt->execute();
-$query = $stmt->get_result();
+$cart_items_result = $stmt->get_result();
+$cart_items = [];
+$grandTotal = 0;
 
+// Process cart items
+while ($item = $cart_items_result->fetch_assoc()) {
+    $item['total'] = $item['quantity'] * $item['price'];
+    $grandTotal += $item['total'];
+    $cart_items[] = $item;
+}
+
+// Include header after setting all variables
 include '../../includes/header.php';
+
+// Display success/error messages
+if (isset($_SESSION['success'])) {
+    echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['success']) . '</div>';
+    unset($_SESSION['success']);
+}
+if (isset($_SESSION['error'])) {
+    echo '<div class="alert alert-error">' . htmlspecialchars($_SESSION['error']) . '</div>';
+    unset($_SESSION['error']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -310,22 +351,10 @@ include '../../includes/header.php';
         <p>Review your items before checkout</p>
     </div>
 
-    <?php
-    $cart_items = [];
-    while($row = mysqli_fetch_assoc($query)) {
-        $cart_items[] = $row;
-    }
-    
-    if (count($cart_items) > 0):
-        $grandTotal = 0;
-    ?>
-    
+    <?php if (count($cart_items) > 0): ?>
     <div class="cart-content">
         <div class="cart-items">
-            <?php foreach($cart_items as $item): 
-                $total = $item['quantity'] * $item['price'];
-                $grandTotal += $total;
-            ?>
+            <?php foreach($cart_items as $item): ?>
             <div class="cart-item">
                 <img src="../uploads/<?= htmlspecialchars($item['image']) ?>" 
                      alt="<?= htmlspecialchars($item['product_name']) ?>" 
@@ -342,10 +371,11 @@ include '../../includes/header.php';
                 </div>
 
                 <div class="cart-item-actions">
-                    <div class="item-total">₱<?= number_format($total, 2) ?></div>
-                    <button class="btn-remove" onclick="confirmDelete(<?= intval($item['id']) ?>)">
+                    <div class="item-total">₱<?= number_format($item['total'], 2) ?></div>
+                    <a href="?action=remove&id=<?= $item['id'] ?>" class="btn-remove" 
+                       onclick="return confirm('Are you sure you want to remove this item from your cart?')">
                         🗑️ Remove
-                    </button>
+                    </a>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -359,6 +389,10 @@ include '../../includes/header.php';
                 <span>₱<?= number_format($grandTotal, 2) ?></span>
             </div>
 
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span>₱0.00</span>
+            </div>
             <div class="summary-row total">
                 <span>Total</span>
                 <span>₱<?= number_format($grandTotal, 2) ?></span>

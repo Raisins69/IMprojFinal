@@ -1,10 +1,7 @@
 <?php
-include __DIR__ . '/../../../includes/config.php';
-
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
-    header("Location: ../../login.php");
-    exit();
-}
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: read.php");
@@ -51,11 +48,11 @@ $stats_stmt->bind_param("s", $customer['email']);
 $stats_stmt->execute();
 $stats = $stats_stmt->get_result()->fetch_assoc();
 
-include '../../../includes/header.php';
+require_once __DIR__ . '/../../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php require_once __DIR__ . '/../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Customer Details</h2>
@@ -152,4 +149,4 @@ include '../../../includes/header.php';
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../../includes/footer.php'; ?>

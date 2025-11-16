@@ -1,0 +1,624 @@
+[2025-11-15 08:41:17] Script started
+[2025-11-15 08:41:17] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+    [success] => ✅ Product updated successfully!
+)
+
+[2025-11-15 08:41:21] Script started
+[2025-11-15 08:41:21] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+    [success] => ✅ Product updated successfully!
+)
+
+[2025-11-15 08:41:21] [update.php:62] === FORM SUBMITTED ===
+[2025-11-15 08:41:21] [update.php:63] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => Nice
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 20
+    [condition_type] => Slightly Used
+    [supplier_id] => 2
+)
+
+[2025-11-15 08:41:21] [update.php:64] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:41:21] [update.php:67] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:41:21] [update.php:68] Upload directory exists: Yes
+[2025-11-15 08:41:21] [update.php:69] Upload directory writable: Yes
+[2025-11-15 08:41:21] [update.php:164] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:41:21] [update.php:209] ✅ Product updated successfully!
+[2025-11-15 08:42:21] Script started
+[2025-11-15 08:42:21] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+    [success] => ✅ Product updated successfully!
+)
+
+[2025-11-15 08:42:24] Script started
+[2025-11-15 08:42:24] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+    [success] => ✅ Product updated successfully!
+)
+
+[2025-11-15 08:42:24] [update.php:62] === FORM SUBMITTED ===
+[2025-11-15 08:42:24] [update.php:63] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => Nice
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 20
+    [condition_type] => Slightly Used
+    [supplier_id] => 
+)
+
+[2025-11-15 08:42:24] [update.php:64] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:42:24] [update.php:67] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:42:24] [update.php:68] Upload directory exists: Yes
+[2025-11-15 08:42:24] [update.php:69] Upload directory writable: Yes
+[2025-11-15 08:42:24] [update.php:164] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:42:24] [update.php:209] ✅ Product updated successfully!
+[2025-11-15 08:42:27] Script started
+[2025-11-15 08:42:27] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:42:30] Script started
+[2025-11-15 08:42:30] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:42:30] [update.php:62] === FORM SUBMITTED ===
+[2025-11-15 08:42:30] [update.php:63] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => Nice
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 20
+    [condition_type] => Slightly Used
+    [supplier_id] => 2
+)
+
+[2025-11-15 08:42:30] [update.php:64] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:42:30] [update.php:67] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:42:30] [update.php:68] Upload directory exists: Yes
+[2025-11-15 08:42:30] [update.php:69] Upload directory writable: Yes
+[2025-11-15 08:42:30] [update.php:164] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:42:30] [update.php:209] ✅ Product updated successfully!
+[2025-11-15 08:42:33] Script started
+[2025-11-15 08:42:33] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:42:37] Script started
+[2025-11-15 08:42:37] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:42:37] [update.php:62] === FORM SUBMITTED ===
+[2025-11-15 08:42:37] [update.php:63] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => nike
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 20
+    [condition_type] => Slightly Used
+    [supplier_id] => 2
+)
+
+[2025-11-15 08:42:37] [update.php:64] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:42:37] [update.php:67] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:42:37] [update.php:68] Upload directory exists: Yes
+[2025-11-15 08:42:37] [update.php:69] Upload directory writable: Yes
+[2025-11-15 08:42:37] [update.php:164] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:42:37] [update.php:209] ✅ Product updated successfully!
+[2025-11-15 08:44:04] Script started
+[2025-11-15 08:44:04] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:44:07] Script started
+[2025-11-15 08:44:07] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:44:07] [update.php:68] === FORM SUBMITTED ===
+[2025-11-15 08:44:07] [update.php:69] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => nike
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 20
+    [condition_type] => Slightly Used
+    [supplier_id] => 2
+)
+
+[2025-11-15 08:44:07] [update.php:70] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:44:07] [update.php:73] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:44:07] [update.php:74] Upload directory exists: Yes
+[2025-11-15 08:44:07] [update.php:75] Upload directory writable: Yes
+[2025-11-15 08:44:07] [update.php:170] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:44:07] [update.php:215] ✅ Product updated successfully!
+[2025-11-15 08:44:53] Script started
+[2025-11-15 08:44:53] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:44:56] Script started
+[2025-11-15 08:44:56] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:44:56] [update.php:68] === FORM SUBMITTED ===
+[2025-11-15 08:44:56] [update.php:69] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => nike
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 20
+    [condition_type] => Slightly Used
+    [supplier_id] => 2
+)
+
+[2025-11-15 08:44:56] [update.php:70] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:44:56] [update.php:73] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:44:56] [update.php:74] Upload directory exists: Yes
+[2025-11-15 08:44:56] [update.php:75] Upload directory writable: Yes
+[2025-11-15 08:44:56] [update.php:170] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:44:56] [update.php:246] ✅ Product updated successfully!
+[2025-11-15 08:44:59] Script started
+[2025-11-15 08:44:59] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:45:05] Script started
+[2025-11-15 08:45:05] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:45:05] [update.php:68] === FORM SUBMITTED ===
+[2025-11-15 08:45:05] [update.php:69] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => nike
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 19
+    [condition_type] => Like New
+    [supplier_id] => 2
+)
+
+[2025-11-15 08:45:05] [update.php:70] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:45:05] [update.php:73] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:45:05] [update.php:74] Upload directory exists: Yes
+[2025-11-15 08:45:05] [update.php:75] Upload directory writable: Yes
+[2025-11-15 08:45:05] [update.php:170] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:45:05] [update.php:246] ✅ Product updated successfully!
+[2025-11-15 08:45:59] Script started
+[2025-11-15 08:45:59] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:46:02] Script started
+[2025-11-15 08:46:02] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:46:02] [update.php:68] === FORM SUBMITTED ===
+[2025-11-15 08:46:02] [update.php:69] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => nike
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 19
+    [condition_type] => Like New
+    [supplier_id] => 1
+)
+
+[2025-11-15 08:46:02] [update.php:70] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:46:02] [update.php:73] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:46:02] [update.php:74] Upload directory exists: Yes
+[2025-11-15 08:46:02] [update.php:75] Upload directory writable: Yes
+[2025-11-15 08:46:02] [update.php:170] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:46:02] [update.php:246] ✅ Product updated successfully!
+[2025-11-15 08:46:05] Script started
+[2025-11-15 08:46:05] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:46:08] Script started
+[2025-11-15 08:46:08] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:46:08] [update.php:68] === FORM SUBMITTED ===
+[2025-11-15 08:46:08] [update.php:69] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => nike
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 19
+    [condition_type] => Like New
+    [supplier_id] => 2
+)
+
+[2025-11-15 08:46:08] [update.php:70] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+)
+
+[2025-11-15 08:46:08] [update.php:73] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:46:08] [update.php:74] Upload directory exists: Yes
+[2025-11-15 08:46:08] [update.php:75] Upload directory writable: Yes
+[2025-11-15 08:46:08] [update.php:170] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:46:08] [update.php:246] ✅ Product updated successfully!
+[2025-11-15 08:46:26] Script started
+[2025-11-15 08:46:26] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:46:35] Script started
+[2025-11-15 08:46:35] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+)
+
+[2025-11-15 08:46:35] [update.php:68] === FORM SUBMITTED ===
+[2025-11-15 08:46:35] [update.php:69] POST data: Array
+(
+    [debug] => 1
+    [name] => TestAgain
+    [brand] => Nice
+    [category] => T-shirt
+    [size] => 20
+    [price] => 1005.00
+    [stock] => 20
+    [condition_type] => Like New
+    [supplier_id] => 2
+)
+
+[2025-11-15 08:46:35] [update.php:70] FILES data: Array
+(
+    [image] => Array
+        (
+            [name] => kazuha.jpg
+            [full_path] => kazuha.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\php4436.tmp
+            [error] => 0
+            [size] => 17482
+        )
+
+)
+
+[2025-11-15 08:46:35] [update.php:73] Current directory: C:\xampp\htdocs\projectIManagement\public\admin\products
+[2025-11-15 08:46:35] [update.php:74] Upload directory exists: Yes
+[2025-11-15 08:46:35] [update.php:75] Upload directory writable: Yes
+[2025-11-15 08:46:35] [update.php:170] Preparing query: UPDATE products SET 
+                name = ?,
+                brand = ?,
+                category = ?,
+                size = ?,
+                price = ?,
+                stock = ?,
+                condition_type = ?,
+                image = ?,
+                supplier_id = ?
+                WHERE id = ?
+[2025-11-15 08:46:35] [update.php:246] ✅ Product updated successfully!
+[2025-11-15 09:00:31] Script started
+[2025-11-15 09:00:31] [update.php:22] Session data: Array
+(
+    [user_id] => 1
+    [username] => admin
+    [email] => admin@urbanthrift.com
+    [role] => admin
+    [csrf_token] => e77fd3e8fe89e342181ef7ae03b6032dd85a5b04aefaba0bf86b6686f11809ff
+)
+

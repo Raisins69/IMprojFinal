@@ -1,5 +1,7 @@
 <?php
-include __DIR__ . '/../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");
@@ -24,7 +26,12 @@ if (!$supplier) {
     exit();
 }
 
-$products = $conn->query("SELECT * FROM products ORDER BY name");
+// Get products that can be supplied by this supplier
+$products = $conn->query("SELECT p.* 
+    FROM products p
+    INNER JOIN supplier_products sp ON p.id = sp.product_id
+    WHERE sp.supplier_id = $supplier_id
+    ORDER BY p.name");
 $msg = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -64,11 +71,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-include '../../../includes/header.php';
+require_once __DIR__ . '/../../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php
+require_once __DIR__ . '/../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Add Delivery for: <?= htmlspecialchars($supplier['name']) ?></h2>
@@ -79,11 +87,15 @@ include '../../../includes/header.php';
             <label>Product *</label>
             <select name="product_id" required>
                 <option value="">Select Product</option>
-                <?php while($product = $products->fetch_assoc()): ?>
-                    <option value="<?= $product['id'] ?>">
-                        <?= htmlspecialchars($product['name']) ?> (Current Stock: <?= $product['stock'] ?>)
-                    </option>
-                <?php endwhile; ?>
+                <?php if ($products && $products->num_rows > 0): ?>
+                    <?php while($product = $products->fetch_assoc()): ?>
+                        <option value="<?= $product['id'] ?>">
+                            <?= htmlspecialchars($product['name']) ?> (Current Stock: <?= $product['stock'] ?>)
+                        </option>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <option value="" disabled>No products available for this supplier</option>
+                <?php endif; ?>
             </select>
 
             <label>Quantity Delivered *</label>
@@ -106,4 +118,8 @@ include '../../../includes/header.php';
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -334,14 +334,20 @@ label {
     padding: 1rem;
     border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
-    font-weight: 500;
     text-align: center;
 }
 
 .alert {
-    background: rgba(255, 71, 87, 0.15);
-    color: var(--error);
-    border: 1px solid rgba(255, 71, 87, 0.3);
+    color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background: var(--success);
+}
+
+.alert-error {
+    background: var(--error);
 }
 
 .msg {

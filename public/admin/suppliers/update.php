@@ -1,72 +1,199 @@
 <?php
-include __DIR__ . '/../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
-    header("Location: ../../login.php");
-    exit();
-}
+// Initialize variables
+$msg = '';
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+// Validate ID
+if (!$id) {
     header("Location: read.php");
     exit();
 }
 
-$id = intval($_GET['id']);
+// Fetch existing data
 $stmt = $conn->prepare("SELECT * FROM suppliers WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
-$result = $stmt->get_result();
-$supplier = $result->fetch_assoc();
+$supplier = $stmt->get_result()->fetch_assoc();
 
 if (!$supplier) {
     header("Location: read.php");
     exit();
 }
 
-if (isset($_POST['update'])) {
+// Update processing
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
     $contact_person = trim($_POST['contact_person']);
     $contact_number = trim($_POST['contact_number']);
     $email = trim($_POST['email']);
     $address = trim($_POST['address']);
 
-    $stmt = $conn->prepare("UPDATE suppliers SET name = ?, contact_person = ?, contact_number = ?, email = ?, address = ? WHERE id = ?");
-    $stmt->bind_param("sssssi", $name, $contact_person, $contact_number, $email, $address, $id);
-    $stmt->execute();
+    // Validate inputs
+    if (empty($name) || empty($contact_person) || empty($email)) {
+        $msg = "❌ Please fill all required fields.";
+    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $msg = "❌ Please enter a valid email address.";
+    } else {
+        // Check for duplicate supplier (name or email)
+        $checkStmt = $conn->prepare("SELECT id FROM suppliers WHERE (name = ? OR email = ?) AND id != ?");
+        $checkStmt->bind_param("ssi", $name, $email, $id);
+        $checkStmt->execute();
+        $checkStmt->store_result();
+        
+        if ($checkStmt->num_rows > 0) {
+            $msg = "❌ A supplier with this name or email already exists.";
+        } else {
+            if (empty($msg)) {
+                $stmt = $conn->prepare("UPDATE suppliers SET name=?, contact_person=?, contact_number=?, email=?, address=? WHERE id=?");
+                $stmt->bind_param("sssssi", $name, $contact_person, $contact_number, $email, $address, $id);
+
+                if ($stmt->execute()) {
+                    $_SESSION['success'] = '✅ Supplier updated successfully';
+                    header("refresh:1; url=read.php");
+                    exit();
+                } else {
+                    $msg = "❌ Update failed: " . $conn->error;
+                }
+            }
+        }
+    }
     
-    header("Location: read.php");
-    exit();
+    // Refresh supplier data
+    $stmt = $conn->prepare("SELECT * FROM suppliers WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $supplier = $stmt->get_result()->fetch_assoc();
 }
 
-include '../../../includes/header.php';
+// Include header
+require_once __DIR__ . '/../../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php
+ require_once '../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Edit Supplier</h2>
+        
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger">
+                ❌ <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger">
+                ❌ <?= htmlspecialchars($_SESSION['error']) ?>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success">
+                ✅ <?= htmlspecialchars($_SESSION['success']) ?>
+            </div>
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
 
-        <form class="form-box" method="POST">
-            <label>Name</label>
-            <input type="text" name="name" value="<?= htmlspecialchars($supplier['name']); ?>" required>
+        <form class="form-box" method="POST" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label for="name">Supplier Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name" 
+                       value="<?= htmlspecialchars($supplier['name'] ?? '') ?>" 
+                       required minlength="2" maxlength="100"
+                       pattern="[\w\s\-\.]{2,100}"
+                       title="Supplier name must be 2-100 characters">
+            </div>
 
-            <label>Contact Person</label>
-            <input type="text" name="contact_person" value="<?= htmlspecialchars($supplier['contact_person']); ?>" required>
+            <div class="form-group">
+                <label for="contact_person">Contact Person <span class="required">*</span></label>
+                <input type="text" id="contact_person" name="contact_person"
+                       value="<?= htmlspecialchars($supplier['contact_person'] ?? '') ?>" 
+                       required minlength="2" maxlength="100">
+            </div>
 
-            <label>Contact Number</label>
-            <input type="text" name="contact_number" value="<?= htmlspecialchars($supplier['contact_number']); ?>" required>
+            <div class="form-group">
+                <label for="contact_number">Contact Number</label>
+                <input type="tel" id="contact_number" name="contact_number"
+                       value="<?= htmlspecialchars($supplier['contact_number'] ?? '') ?>"
+                       pattern="[\d\s\-+()]{10,20}"
+                       title="Please enter a valid phone number">
+            </div>
 
-            <label>Email</label>
-            <input type="email" name="email" value="<?= htmlspecialchars($supplier['email']); ?>" required>
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email"
+                       value="<?= htmlspecialchars($supplier['email'] ?? '') ?>" 
+                       required>
+            </div>
 
-            <label>Address</label>
-            <textarea name="address" required><?= htmlspecialchars($supplier['address']); ?></textarea>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" rows="3"><?= 
+                    htmlspecialchars($supplier['address'] ?? '') 
+                ?></textarea>
+            </div>
+            
 
-            <button type="submit" name="update" class="btn-primary">Update Supplier</button>
-            <a href="read.php" class="btn-secondary">Cancel</a>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <span class="btn-icon">💾</span> Update Supplier
+                </button>
+                <a href="read.php" class="btn-secondary">
+                    <span class="btn-icon">✕</span> Cancel
+                </a>
+            </div>
+            
+            <script>
+            function validateForm() {
+                const name = document.getElementById('name').value.trim();
+                const contactPerson = document.getElementById('contact_person').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                // Basic validation
+                if (name.length < 2 || name.length > 100) {
+                    alert('Supplier name must be between 2 and 100 characters');
+                    return false;
+                }
+                
+                if (contactPerson.length < 2 || contactPerson.length > 100) {
+                    alert('Contact person name must be between 2 and 100 characters');
+                    return false;
+                }
+                
+                if (!emailRegex.test(email)) {
+                    alert('Please enter a valid email address');
+                    return false;
+                }
+                
+                // File validation if a file is selected
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const fileSize = file.size / 1024 / 1024; // in MB
+                    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    
+                    if (!validTypes.includes(file.type)) {
+                        alert('Only JPG, PNG, GIF, and WEBP images are allowed');
+                        return false;
+                    }
+                    
+                    if (fileSize > 5) { // 5MB limit
+                        alert('File size must be less than 5MB');
+                        return false;
+                    }
+                }
+                
+                return confirm('Are you sure you want to update this supplier?');
+            }
+            </script>
         </form>
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../../includes/footer.php'; ?>

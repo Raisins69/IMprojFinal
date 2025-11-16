@@ -54,14 +54,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO users (username, email, password, phone, address, profile_photo) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssss", $username, $email, $hashed_password, $phone, $address, $profile_photo);
-
-            if ($stmt->execute()) {
+            
+            // Start transaction to ensure both inserts succeed or fail together
+            $conn->begin_transaction();
+            
+            try {
+                // Insert into users table
+                $stmt = $conn->prepare("INSERT INTO users (username, email, password, phone, address, profile_photo) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssssss", $username, $email, $hashed_password, $phone, $address, $profile_photo);
+                $stmt->execute();
+                
+                // Get the newly created user ID
+                $user_id = $stmt->insert_id;
+                
+                // Insert into customers table
+                $customer_sql = "INSERT INTO customers (name, email, contact_number, address) 
+                               VALUES (?, ?, ?, ?)";
+                $customer_stmt = $conn->prepare($customer_sql);
+                $customer_stmt->bind_param("ssss", $username, $email, $phone, $address);
+                $customer_stmt->execute();
+                
+                // Commit the transaction if both inserts were successful
+                $conn->commit();
+                
                 header("Location: login.php?registered=true");
                 exit();
-            } else {
-                $message = "❌ Registration failed!";
+                
+            } catch (Exception $e) {
+                // Rollback the transaction on error
+                $conn->rollback();
+                error_log("Registration error: " . $e->getMessage());
+                $message = "❌ Registration failed! Please try again.";
                 $message_type = "error";
             }
         }

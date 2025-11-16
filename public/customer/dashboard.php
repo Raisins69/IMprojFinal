@@ -7,52 +7,124 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'customer') {
     exit();
 }
 
-// Get user data
+// Get user data and initialize stats
 $user_id = $_SESSION['user_id'];
-$stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-
-// Get customer_id
-$customer_id = $_SESSION['customer_id'] ?? null;
-
-// Get stats
 $total_orders = 0;
 $total_spent = 0;
-$pending_orders = 0;
+$total_items = 0;
+$account_status = 'Active';
 
-if ($customer_id) {
-    // Total orders
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE customer_id = ?");
-    $stmt->bind_param("i", $customer_id);
-    $stmt->execute();
-    $total_orders = $stmt->get_result()->fetch_assoc()['count'];
+// Debug: Log the user ID we're querying for
+error_log("Fetching dashboard data for user ID: " . $user_id);
 
-    // Total spent
-    $stmt = $conn->prepare("SELECT SUM(total_amount) as total FROM orders WHERE customer_id = ?");
-    $stmt->bind_param("i", $customer_id);
-    $stmt->execute();
-    $total_spent = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
+// Get user details from session
+if (!isset($_SESSION['user_id'])) {
+    header("Location: " . BASE_URL . "/login.php");
+    exit();
+}
 
-    // Pending orders
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE customer_id = ? AND status = 'Pending'");
-    $stmt->bind_param("i", $customer_id);
-    $stmt->execute();
-    $pending_orders = $stmt->get_result()->fetch_assoc()['count'];
+$user_id = $_SESSION['user_id'];
 
-    // Recent orders
-    $stmt = $conn->prepare("SELECT o.*, COUNT(oi.id) as item_count 
-                           FROM orders o 
-                           LEFT JOIN order_items oi ON o.id = oi.order_id
-                           WHERE o.customer_id = ? 
-                           GROUP BY o.id
-                           ORDER BY o.order_date DESC 
-                           LIMIT 5");
-    $stmt->bind_param("i", $customer_id);
-    $stmt->execute();
-    $recent_orders = $stmt->get_result();
+// First, get the customer ID that matches this user's email
+$stmt = $conn->prepare("SELECT u.id, u.username, u.email, u.profile_photo, u.is_active, c.id as customer_id 
+                        FROM users u 
+                        LEFT JOIN customers c ON u.email = c.email 
+                        WHERE u.id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+
+if ($user) {
+    // Set account status based on is_active flag
+    $account_status = $user['is_active'] ? 'Active' : 'Inactive';
+    
+    if (empty($user['customer_id'])) {
+        // If no customer record exists, create one
+        $stmt = $conn->prepare("INSERT INTO customers (name, email) VALUES (?, ?)");
+        $stmt->bind_param("ss", $user['username'], $user['email']);
+        if ($stmt->execute()) {
+            $customer_id = $conn->insert_id;
+            error_log("Created new customer record with ID: " . $customer_id);
+        } else {
+            error_log("Error creating customer record: " . $conn->error);
+            die("Error setting up your account. Please contact support.");
+        }
+    } else {
+        $customer_id = $user['customer_id'];
+        error_log("Using existing customer_id: " . $customer_id);
+    }
+    
+    try {
+        // Get order statistics
+        $sql = "\n            SELECT \n                COUNT(*) as total_orders,\n                SUM(CASE WHEN status = 'Completed' THEN total_amount ELSE 0 END) as total_spent,\n                SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed_orders\n            FROM orders \n            WHERE customer_id = ?";
+            
+        error_log("Debug - Running query: $sql");
+        error_log("Debug - With customer_id: $customer_id");
+        
+        $stmt = $conn->prepare($sql) or die($conn->error);
+        $stmt->bind_param("i", $customer_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if (!$result) {
+            error_log("Debug - Error getting result: " . $conn->error);
+            $stats = [];
+        } else {
+            $stats = $result->fetch_assoc();
+            error_log("Debug - Query result: " . print_r($stats, true));
+        }
+        
+        $total_orders = isset($stats['total_orders']) ? (int)$stats['total_orders'] : 0;
+        $total_spent = isset($stats['total_spent']) ? (float)$stats['total_spent'] : 0.00;
+        
+        error_log("Debug - Calculated totals - Orders: $total_orders, Spent: $total_spent");
+        
+        // Debug log
+        error_log(sprintf(
+            "Customer %d - Orders: %d, Completed: %d, Total Spent: %.2f",
+            $customer_id,
+            $total_orders,
+            $stats['completed_orders'] ?? 0,
+            $total_spent
+        ));
+        
+        error_log("Total orders: $total_orders, Total spent: $total_spent");
+        
+        // Get total items from non-cancelled orders
+        $stmt = $conn->prepare("
+            SELECT COALESCE(SUM(oi.quantity), 0) as total_items
+            FROM orders o
+            JOIN order_items oi ON o.id = oi.order_id
+            WHERE o.customer_id = ? AND o.status != 'Cancelled'
+        ") or die($conn->error);
+        $stmt->bind_param("i", $customer_id);
+        $stmt->execute();
+        $items_result = $stmt->get_result()->fetch_assoc();
+        $total_items = (int)($items_result['total_items'] ?? 0);
+        
+        error_log("Total items in non-cancelled orders: $total_items");
+        
+        // Get recent orders with item counts
+        $stmt = $conn->prepare("
+            SELECT 
+                o.*,
+                (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as item_count,
+                o.total_amount as order_total
+            FROM orders o
+            WHERE o.customer_id = ? AND o.status != 'Cancelled'
+            ORDER BY o.order_date DESC
+            LIMIT 5
+        ") or die($conn->error);
+        $stmt->bind_param("i", $customer_id);
+        $stmt->execute();
+        $recent_orders = $stmt->get_result();
+        
+        // Debug: Log recent orders count
+        error_log("Recent orders found: " . $recent_orders->num_rows);
+        
+    } catch (Exception $e) {
+        error_log("Dashboard error: " . $e->getMessage());
+        $recent_orders = [];
+    }
 }
 
 include '../../includes/header.php';
@@ -74,12 +146,15 @@ include '../../includes/header.php';
 
         .dashboard-header {
             background: linear-gradient(135deg, var(--dark-light) 0%, var(--dark) 100%);
-            padding: 3rem;
+            padding: 2rem 3rem;
             border-radius: var(--radius-xl);
             border: 1px solid rgba(155, 77, 224, 0.2);
             margin-bottom: 3rem;
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
         }
 
         .dashboard-header::before {
@@ -93,6 +168,24 @@ include '../../includes/header.php';
             filter: blur(60px);
         }
 
+        .profile-picture-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            flex-shrink: 0;
+            background: var(--darker);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .profile-picture {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
         .dashboard-header-content {
             position: relative;
             z-index: 1;
@@ -380,9 +473,33 @@ include '../../includes/header.php';
 <div class="dashboard-wrapper">
     <!-- Header -->
     <div class="dashboard-header">
+        <div class="profile-picture-container">
+            <?php
+            // Check if user has a profile picture, otherwise use default
+            $profile_pic = !empty($user['profile_photo']) 
+                ? '/IMprojFinal/public/uploads/profiles/' . htmlspecialchars($user['profile_photo'])
+                : 'https://ui-avatars.com/api/?name=' . urlencode($user['username'] ?? 'User') . '&background=9b4de0&color=fff&size=200';
+            
+            // Debug: Output the full path for verification
+            $full_path = $_SERVER['DOCUMENT_ROOT'] . '/IMprojFinal/public/uploads/profiles/' . htmlspecialchars($user['profile_photo'] ?? '');
+            error_log("Full server path to profile picture: " . $full_path);
+            error_log("File exists: " . (file_exists($full_path) ? 'Yes' : 'No'));
+            
+            // Debug output
+            error_log("Profile picture path: " . $profile_pic);
+            ?>
+            <div style="position: relative;">
+                <img src="<?= $profile_pic ?>" alt="Profile Picture" class="profile-picture" 
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=<?= urlencode($user['username'] ?? 'User') ?>&background=9b4de0&color=fff&size=200';">
+                <!-- Debug output -->
+                <div style="position: absolute; top: 100%; left: 0; background: white; color: black; padding: 5px; font-size: 12px; display: none;">
+                    Debug: <?= htmlspecialchars($profile_pic) ?>
+                </div>
+            </div>
+        </div>
         <div class="dashboard-header-content">
             <h1>👋 Welcome Back!</h1>
-            <p class="greeting">Good to see you, <span><?= htmlspecialchars($user['username']) ?></span></p>
+            <p class="greeting">Good to see you, <span><?= !empty($user['username']) ? htmlspecialchars($user['username']) : 'Valued Customer' ?></span></p>
         </div>
     </div>
 
@@ -401,14 +518,14 @@ include '../../includes/header.php';
         </div>
 
         <div class="stat-card">
-            <span class="stat-icon">⏳</span>
-            <div class="stat-value"><?= $pending_orders ?></div>
-            <div class="stat-label">Pending Orders</div>
+            <span class="stat-icon">📦</span>
+            <div class="stat-value"><?= $total_items ?></div>
+            <div class="stat-label">Total Items Ordered</div>
         </div>
 
         <div class="stat-card">
             <span class="stat-icon">🎯</span>
-            <div class="stat-value"><?= $customer_id ? 'Active' : 'Guest' ?></div>
+            <div class="stat-value"><?= $user_id ? $account_status : 'Guest' ?></div>
             <div class="stat-label">Account Status</div>
         </div>
     </div>
@@ -444,37 +561,42 @@ include '../../includes/header.php';
     <div class="recent-orders-section">
         <h2>📦 Recent Orders</h2>
 
-        <?php if ($customer_id && $recent_orders->num_rows > 0): ?>
+        <?php 
+        // Debug: Check what's in recent_orders
+        error_log("Recent orders count: " . $recent_orders->num_rows);
+        
+        if ($recent_orders && $recent_orders->num_rows > 0): 
+            // Reset pointer to beginning
+            $recent_orders->data_seek(0);
+        ?>
             <table class="orders-table">
                 <thead>
                     <tr>
-                        <th>Order ID</th>
+                        <th>Order #</th>
                         <th>Date</th>
                         <th>Items</th>
-                        <th>Amount</th>
+                        <th>Total</th>
                         <th>Payment</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while($order = $recent_orders->fetch_assoc()): ?>
-                    <tr>
-                        <td class="order-id">#<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?></td>
-                        <td><?= date('M d, Y', strtotime($order['order_date'])) ?></td>
-                        <td><?= $order['item_count'] ?> item(s)</td>
-                        <td>₱<?= number_format($order['total_amount'], 2) ?></td>
-                        <td><?= htmlspecialchars($order['payment_method']) ?></td>
-                        <td>
-                            <span class="order-status status-<?= strtolower($order['status']) ?>">
-                                <?= htmlspecialchars($order['status']) ?>
-                            </span>
-                        </td>
-                        <td>
-                            <a href="../admin/transactions/view.php?id=<?= $order['id'] ?>" 
-                               style="color: var(--primary-light); text-decoration: none; font-weight: 600;">
-                                View →
-                            </a>
+                    <?php while ($order = $recent_orders->fetch_assoc()): 
+                        // Debug: Log order data
+                        error_log("Order data: " . print_r($order, true));
+                    ?>
+                        <tr>
+                            <td>#<?= htmlspecialchars($order['id']) ?></td>
+                            <td><?= date('M d, Y h:i A', strtotime($order['order_date'])) ?></td>
+                            <td><?= (int)$order['item_count'] ?> item<?= $order['item_count'] != 1 ? 's' : '' ?></td>
+                            <td>₱<?= number_format((float)$order['total_amount'], 2) ?></td>
+                            <td><?= htmlspecialchars($order['payment_method'] ?? 'Cash') ?></td>
+                            <td>
+                                <span class="status-badge status-<?= strtolower($order['status'] ?? 'pending') ?>">
+                                    <?= htmlspecialchars($order['status'] ?? 'Pending') ?>
+                                </span>
+                            </td>
+                        </tr>
                         </td>
                     </tr>
                     <?php endwhile; ?>

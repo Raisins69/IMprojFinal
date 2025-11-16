@@ -1,5 +1,7 @@
 <?php
-include __DIR__ . '/../../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../../includes/config.php';
+checkAdmin();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");
@@ -72,11 +74,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-include '../../../includes/header.php';
+require_once __DIR__ . '/../../../includes/header.php';
 ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php require_once __DIR__ . '/../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Edit Transaction #<?= str_pad($order_id, 6, '0', STR_PAD_LEFT) ?></h2>
@@ -130,7 +132,7 @@ include '../../../includes/header.php';
             <tbody>
                 <?php while($item = $items->fetch_assoc()): ?>
                 <tr>
-                    <td><img src="<?= BASE_URL ?>/uploads/<?= htmlspecialchars($item['image']) ?>" height="50" style="border-radius: 8px;"></td>
+                    <td><img src="<?= BASE_URL ?>/uploads/<?= htmlspecialchars($item['image']) ?>" height="50" style="border-radius: 8px;" alt="<?= htmlspecialchars($item['product_name']) ?>"></td>
                     <td><?= htmlspecialchars($item['product_name']) ?></td>
                     <td><?= $item['quantity'] ?></td>
                     <td>₱<?= number_format($item['price'], 2) ?></td>
@@ -184,4 +186,4 @@ include '../../../includes/header.php';
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../../includes/footer.php'; ?>

@@ -11,20 +11,20 @@
         <div class="footer-section">
             <h4>Quick Links</h4>
             <ul>
-                <li><a href="/projectIManagement/public/index.php">Shop</a></li>
-                <li><a href="/projectIManagement/public/about.php">About</a></li>
-                <li><a href="/projectIManagement/public/contact.php">Contact</a></li>
+                <li><a href="/IMprojFinal/public/index.php">Shop</a></li>
+                <li><a href="/IMprojFinal/public/about.php">About</a></li>
+                <li><a href="/IMprojFinal/public/contact.php">Contact</a></li>
 
                 <?php if(isset($_SESSION['role']) && $_SESSION['role'] === "customer"): ?>
-                    <li><a href="/projectIManagement/public/customer/dashboard.php">My Account</a></li>
-                    <li><a href="/projectIManagement/public/cart/cart.php">Cart</a></li>
+                    <li><a href="/IMprojFinal/public/customer/dashboard.php">My Account</a></li>
+                    <li><a href="/IMprojFinal/public/cart/cart.php">Cart</a></li>
 
                 <?php elseif(isset($_SESSION['role']) && $_SESSION['role'] === "admin"): ?>
-                    <li><a href="/projectIManagement/public/admin/dashboard.php">Admin Panel</a></li>
+                    <li><a href="/IMprojFinal/public/admin/dashboard.php">Admin Panel</a></li>
 
                 <?php else: ?>
-                    <li><a href="/projectIManagement/public/login.php">Login</a></li>
-                    <li><a href="/projectIManagement/public/register.php">Register</a></li>
+                    <li><a href="/IMprojFinal/public/login.php">Login</a></li>
+                    <li><a href="/IMprojFinal/public/register.php">Register</a></li>
                 <?php endif; ?>
             </ul>
         </div>

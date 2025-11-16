@@ -1,4 +1,8 @@
 <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+
 // Determine the base path relative to current location
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 $base_path = ($current_dir === 'admin') ? '.' : '..';

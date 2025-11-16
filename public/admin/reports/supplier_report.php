@@ -1,5 +1,9 @@
 <?php
-include __DIR__ . '/../../../includes/config.php';
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+
+require_once __DIR__ . '/../../includes/config.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../../login.php");
@@ -30,10 +34,18 @@ $stmt->execute();
 $result = $stmt->get_result();
 ?>
 
-<?php include '../../../includes/header.php'; ?>
+<?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ require_once __DIR__ . '/../../includes/header.php'; ?>
 
 <div class="admin-container">
-    <?php include '../sidebar.php'; ?>
+    <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ require_once '../sidebar.php'; ?>
 
     <main class="admin-content">
         <h2>Supplier Summary Report</h2>
@@ -65,7 +77,11 @@ $result = $stmt->get_result();
                 </tr>
             </thead>
             <tbody>
-                <?php 
+                <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ 
                 $grand_total_qty = 0;
                 $grand_total_cost = 0;
                 while($row = $result->fetch_assoc()): 
@@ -83,7 +99,11 @@ $result = $stmt->get_result();
                         <a class="btn-view" href="../suppliers/deliveries.php?supplier_id=<?= intval($row['id']) ?>">View Deliveries</a>
                     </td>
                 </tr>
-                <?php endwhile; ?>
+                <?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ endwhile; ?>
             </tbody>
             <tfoot>
                 <tr style="font-weight: bold; background: #7B1FA2;">
@@ -97,4 +117,8 @@ $result = $stmt->get_result();
     </main>
 </div>
 
-<?php include '../../../includes/footer.php'; ?>
+<?php
+// Include config and check admin access
+require_once __DIR__ . '/../../includes/config.php';
+checkAdmin();
+ require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -1,5 +1,5 @@
 <?php 
-require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/includes/config.php';
 
 // Get featured products (3 random or newest products)
 $featured_query = $conn->query("SELECT * FROM products WHERE stock > 0 ORDER BY created_at DESC LIMIT 3");
@@ -11,7 +11,7 @@ $featured_query = $conn->query("SELECT * FROM products WHERE stock > 0 ORDER BY 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UrbanThrift - Sustainable Fashion Marketplace</title>
-    <link rel="stylesheet" href="/projectIManagement/public/css/style.css">
+    <link rel="stylesheet" href="/IMprojFinal/public/css/style.css">
     <style>
         /* Hero Section */
         .hero-section {
@@ -546,7 +546,7 @@ $featured_query = $conn->query("SELECT * FROM products WHERE stock > 0 ORDER BY 
 </head>
 <body>
 
-<?php include '../includes/header.php'; ?>
+<?php include './includes/header.php'; ?>
 
 <!-- Hero Section -->
 <section class="hero-section">
@@ -662,7 +662,7 @@ $featured_query = $conn->query("SELECT * FROM products WHERE stock > 0 ORDER BY 
             <?php while($product = $featured_query->fetch_assoc()): ?>
             <div class="featured-card" onclick="window.location.href='product_view.php?id=<?= $product['id'] ?>'">
                 <div class="featured-image">
-                    <img src="uploads/<?= htmlspecialchars($product['image']) ?>" 
+                    <img src="<?= BASE_URL ?>/uploads/<?= htmlspecialchars($product['image']) ?>" 
                          alt="<?= htmlspecialchars($product['name']) ?>">
                     <span class="featured-badge"><?= htmlspecialchars($product['condition_type']) ?></span>
                 </div>
