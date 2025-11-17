@@ -17,14 +17,17 @@ $customer_id = $_SESSION['user_id'];
 
 // Verify the order belongs to the customer and is pending
 $stmt = $conn->prepare("
-    SELECT o.* 
+    SELECT o.*, u.email as user_email 
     FROM orders o
     JOIN customers c ON o.customer_id = c.id
-    WHERE o.id = ? AND c.email = (SELECT email FROM users WHERE id = ?) AND o.status = 'Pending'
+    JOIN users u ON u.id = c.user_id
+    WHERE o.id = ? AND u.id = ? AND o.status = 'Pending'
+    LIMIT 1
 ");
 $stmt->bind_param("ii", $order_id, $customer_id);
 $stmt->execute();
 $order = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
 if (!$order) {
     $_SESSION['error'] = "Order not found, already processed, or cannot be cancelled";
